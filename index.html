@@ -1094,6 +1094,76 @@
     letter-spacing: 0.04em;
   }
 
+  /* ── 提示區塊隱藏按鈕 ── */
+  .home-tip-card { position: relative; }
+  .btn-hide-tip {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: none; border: none;
+    color: var(--ink-light); font-size: 14px;
+    cursor: pointer; padding: 2px 6px; border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .btn-hide-tip:hover { color: var(--accent); background: var(--accent-pale); }
+  .tip-icon { transition: transform 0.15s; }
+  .tip-icon:hover { transform: scale(1.2); }
+
+  /* ── 步驟數字可點擊換 icon ── */
+  .step-num-clickable {
+    cursor: default;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  body.editing .step-num-clickable {
+    cursor: pointer;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  body.editing .step-num-clickable:hover {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 3px var(--accent);
+  }
+
+  /* ── Icon Picker ── */
+  .icon-picker {
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .icon-selected {
+    font-size: 2rem;
+    text-align: center;
+    padding: 10px;
+    background: var(--paper-warm);
+    border-bottom: 1px solid var(--border);
+    cursor: default;
+  }
+  .icon-grid, .icon-grid-large {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--paper-warm);
+  }
+  .icon-grid-large {
+    grid-template-columns: repeat(9, 1fr);
+    max-height: 320px;
+  }
+  .icon-opt {
+    background: white;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.1s;
+    line-height: 1;
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .icon-opt:hover { background: var(--accent-pale); border-color: var(--accent); transform: scale(1.1); }
+  .icon-opt.selected { background: var(--accent-pale); border-color: var(--accent); }
+
   /* ══ 手機抽屜滑入動畫（已在 drawer CSS 中設定）══ */
   @media (max-width: 768px) {
     main {
@@ -1179,12 +1249,13 @@
           <div class="page-title" style="font-family:'Noto Serif TC',serif">資料申請教學平台</div>
         </div>
       </div>
-      <div class="info-card tip">
-        <div class="card-icon">💡</div>
+      <div class="info-card tip home-tip-card" id="home-tip-card">
+        <div class="card-icon tip-icon" id="tip-icon" onclick="pickTipIcon()" title="點擊換圖示" style="cursor:pointer">💡</div>
         <div class="card-body">
-          <div class="card-title">如何使用此平台</div>
-          <p>點擊右上角「新增教學」來建立新的教學頁面，或從左側選單選擇現有教學。每個教學頁面支援圖文並茂的步驟說明與可編輯表格。</p>
+          <div class="card-title" id="tip-title" contenteditable="false" title="雙擊編輯標題" ondblclick="enableHomeEdit(this)">如何使用此平台</div>
+          <p id="tip-body" contenteditable="false" title="雙擊編輯內文" ondblclick="enableHomeEdit(this)">點擊右上角「新增教學」來建立新的教學頁面，或從左側選單選擇現有教學。每個教學頁面支援圖文並茂的步驟說明與可編輯表格。</p>
         </div>
+        <button class="btn-hide-tip" onclick="document.getElementById('home-tip-card').style.display='none';showToast('已隱藏提示區塊')" title="隱藏此區塊">✕</button>
       </div>
       <div id="guide-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-top:2rem;"></div>
       <div id="empty-home" class="empty-state" style="display:none;">
@@ -1209,16 +1280,16 @@
       <input type="text" class="form-input" id="new-title" placeholder="例如：戶籍謄本申請步驟">
     </div>
     <div class="form-group">
-      <label class="form-label">分類</label>
-      <select class="form-select" id="new-category">
-        <option value="戶政">戶政</option>
-        <option value="地政">地政</option>
-        <option value="稅務">稅務</option>
-        <option value="健保">健保</option>
-        <option value="金融信用">金融信用</option>
-        <option value="勞動保險">勞動保險</option>
-        <option value="其他">其他</option>
-      </select>
+      <label class="form-label">分類名稱</label>
+      <input type="text" class="form-input" id="new-category" placeholder="例如：戶政、稅務、其他...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">選擇 Icon</label>
+      <div class="icon-picker" id="icon-picker">
+        <div class="icon-selected" id="icon-selected">📋</div>
+        <div class="icon-grid" id="icon-grid"></div>
+      </div>
+      <input type="hidden" id="new-icon" value="📋">
     </div>
     <div class="form-group">
       <label class="form-label">簡短描述</label>
@@ -1227,6 +1298,17 @@
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
       <button class="btn-confirm" onclick="createGuide()">建立教學</button>
+    </div>
+  </div>
+</div>
+
+<!-- 步驟 Icon 選擇器 Modal -->
+<div class="modal-bg" id="step-icon-modal">
+  <div class="modal" style="max-width:380px">
+    <h3>選擇步驟圖示</h3>
+    <div class="icon-grid-large" id="step-icon-grid"></div>
+    <div style="margin-top:1rem;text-align:right">
+      <button class="btn-cancel" onclick="closeStepIconModal()">取消</button>
     </div>
   </div>
 </div>
@@ -1616,10 +1698,11 @@
     empty.style.display = 'none';
     container.innerHTML = guides.map(g => `
       <div onclick="showSection('guide','${g.id}')" style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.2rem;cursor:pointer;transition:all 0.2s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+        <div style="font-size:2rem;margin-bottom:8px">${g.icon || '📋'}</div>
         <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px">${g.category}</div>
         <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:var(--ink)">${g.title}</div>
         <div style="font-size:13px;color:var(--ink-light);line-height:1.6">${g.desc}</div>
-        <div style="margin-top:12px;font-size:12px;color:var(--ink-light)">📋 ${g.steps.length} 個步驟</div>
+        <div style="margin-top:12px;font-size:12px;color:var(--ink-light)">${g.icon || '📋'} ${g.steps.length} 個步驟</div>
       </div>
     `).join('');
   }
@@ -1640,7 +1723,7 @@
       <div class="page-header">
         <div class="page-title-group">
           <div class="page-category">${guide.category}</div>
-          <div class="page-title">${guide.title}</div>
+          <div class="page-title"><span style="margin-right:8px">${guide.icon||'📋'}</span>${guide.title}</div>
           <div class="page-meta">
             <span>📋 ${guide.steps.length} 個步驟</span>
             <span class="edit-badge">編輯模式</span>
@@ -1695,9 +1778,11 @@
   }
 
   function buildStepHtml(step, num, guideId) {
+    const icon = step.icon || null;
+    const numDisplay = icon ? `<span style="font-size:1.2rem">${icon}</span>` : num;
     return `
       <div class="step-block" id="${step.id}">
-        <div class="step-number">${num}</div>
+        <div class="step-number step-num-clickable" onclick="openStepIconModal('${step.id}')" title="點擊更換圖示">${numDisplay}</div>
         <div class="step-content">
           <div class="step-title-row">
             <div class="step-title" data-field="title">${step.title}</div>
@@ -1870,13 +1955,15 @@
     const title = document.getElementById('new-title').value.trim();
     if (!title) { alert('請輸入教學名稱'); return; }
     const id = 'guide-' + Date.now();
+    const catInput = document.getElementById('new-category').value.trim();
     const guide = {
       id,
       title,
-      category: document.getElementById('new-category').value,
+      icon: document.getElementById('new-icon').value || '📋',
+      category: catInput || '其他',
       desc: document.getElementById('new-desc').value || '點擊進入查看詳細教學步驟',
       steps: [
-        { id: `${id}-s1`, title: '步驟一：準備', body: '請在此填寫步驟說明...' }
+        { id: `${id}-s1`, title: '步驟一：準備', body: '請在此填寫步驟說明...', icon: null }
       ],
       table: {
         headers: ['項目', '說明', '備註'],
@@ -1892,7 +1979,10 @@
     showSection('guide', id);
     showToast(`✅ 已建立「${title}」教學頁面`);
     document.getElementById('new-title').value = '';
+    document.getElementById('new-category').value = '';
     document.getElementById('new-desc').value = '';
+    document.getElementById('new-icon').value = '📋';
+    document.getElementById('icon-selected').textContent = '📋';
   }
 
   // ── 圖片上傳 ──
@@ -2124,8 +2214,95 @@
     if (label) label.textContent = title ? '📄 ' + title : '📋 所有教學';
   }
 
+  // ── Icon Picker ──
+  const ALL_ICONS = ["📋", "📄", "📝", "📌", "📎", "🗂️", "📁", "🗃️", "🗄️", "📊", "📈", "📉", "🔖", "🏷️", "✅", "☑️", "❎", "🔴", "🟡", "🟢", "🔵", "🟣", "⭕", "❓", "❗", "💡", "⚠️", "🔔", "🔕", "🏠", "🏢", "🏦", "🏥", "🏛️", "🏗️", "🏘️", "🌐", "🗺️", "📍", "📮", "📬", "📭", "👤", "👥", "👨\u200d💼", "👩\u200d💼", "🧑\u200d💻", "👨\u200d⚕️", "👩\u200d⚕️", "👮", "🧑\u200d🏫", "👷", "🤝", "🫱", "🫲", "💰", "💳", "💵", "🏧", "💹", "🪙", "💎", "🏆", "🥇", "🎯", "🎖️", "🏅", "🔐", "🔒", "🔓", "🔑", "🗝️", "🛡️", "🔏", "📡", "🔭", "🔬", "🧪", "⚙️", "🔧", "🔨", "🛠️", "📱", "💻", "🖥️", "🖨️", "📠", "☎️", "📞", "📟", "🖱️", "⌨️", "💾", "📀", "💿", "🚗", "🚌", "🚎", "🚐", "🚑", "🚒", "✈️", "🚂", "🚢", "🛵", "🚲", "🛺", "📅", "📆", "🗓️", "⏰", "⏱️", "⌛", "🕐", "🗒️", "📓", "📔", "📒", "📕", "📗", "📘", "📙", "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "💔", "💝", "💖", "💗", "💓", "💞", "💕", "⭐", "🌟", "✨", "💫", "🔥", "💥", "🌈", "☀️", "🌙", "🌊", "🍀", "🌸", "🌺", "🌻", "🌼", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🅰️", "🅱️", "🆎", "🆑", "🆒", "🆓", "🆔", "🆕", "🆖", "🆗", "🆘", "🆙", "🆚"];
+
+  function initIconPicker() {
+    const grid = document.getElementById('icon-grid');
+    if (!grid || grid.children.length > 0) return;
+    ALL_ICONS.forEach(ic => {
+      const btn = document.createElement('button');
+      btn.className = 'icon-opt';
+      btn.textContent = ic;
+      btn.onclick = () => {
+        document.getElementById('new-icon').value = ic;
+        document.getElementById('icon-selected').textContent = ic;
+        grid.querySelectorAll('.icon-opt').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      };
+      grid.appendChild(btn);
+    });
+  }
+
+  function pickTipIcon() {
+    // Open a simple prompt for home tip icon
+    const ic = prompt('輸入一個 Emoji 作為圖示：', document.getElementById('tip-icon').textContent);
+    if (ic && ic.trim()) document.getElementById('tip-icon').textContent = ic.trim();
+  }
+
+  function enableHomeEdit(el) {
+    el.contentEditable = 'true';
+    el.style.borderBottom = '2px dashed var(--blue)';
+    el.focus();
+    el.onblur = () => { el.contentEditable = 'false'; el.style.borderBottom = ''; };
+    el.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); } };
+  }
+
+  // ── 步驟 Icon Modal ──
+  let _stepIconTargetId = null;
+
+  function openStepIconModal(stepId) {
+    if (!document.body.classList.contains('editing')) return; // 只在編輯模式才能換
+    _stepIconTargetId = stepId;
+    const grid = document.getElementById('step-icon-grid');
+    grid.innerHTML = '';
+    // Add "reset to number" option first
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'icon-opt';
+    resetBtn.innerHTML = '<span style="font-size:11px;font-weight:700">1,2,3...</span>';
+    resetBtn.title = '恢復數字';
+    resetBtn.onclick = () => { applyStepIcon(stepId, null); closeStepIconModal(); };
+    grid.appendChild(resetBtn);
+    ALL_ICONS.forEach(ic => {
+      const btn = document.createElement('button');
+      btn.className = 'icon-opt';
+      btn.textContent = ic;
+      btn.onclick = () => { applyStepIcon(stepId, ic); closeStepIconModal(); };
+      grid.appendChild(btn);
+    });
+    document.getElementById('step-icon-modal').classList.add('open');
+  }
+
+  function applyStepIcon(stepId, icon) {
+    const numEl = document.querySelector(`#${stepId} .step-number`);
+    if (!numEl) return;
+    if (icon) {
+      numEl.innerHTML = `<span style="font-size:1.2rem">${icon}</span>`;
+    } else {
+      // restore sequential number
+      const container = numEl.closest('.steps-container');
+      if (container) {
+        const blocks = container.querySelectorAll('.step-block');
+        blocks.forEach((b, i) => {
+          const n = b.querySelector('.step-number');
+          if (!n.dataset.customIcon) n.innerHTML = i + 1;
+        });
+      }
+    }
+    if (icon) numEl.dataset.customIcon = icon;
+    else delete numEl.dataset.customIcon;
+  }
+
+  function closeStepIconModal() {
+    document.getElementById('step-icon-modal').classList.remove('open');
+    _stepIconTargetId = null;
+  }
+
   // ── Modal ──
-  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function openModal() {
+    document.getElementById('modal').classList.add('open');
+    initIconPicker();
+  }
   function closeModal() { document.getElementById('modal').classList.remove('open'); }
   document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
 
