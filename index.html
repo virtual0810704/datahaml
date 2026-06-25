@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>資料申請教學平台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --ink-light: #4a4a6a;
+    --paper: #faf9f6;
+    --paper-warm: #f3f1ea;
+    --accent: #c8502a;
+    --accent-light: #e8d5cb;
+    --accent-pale: #fdf5f2;
+    --gold: #b8952a;
+    --gold-light: #f5edce;
+    --border: #ddd9cc;
+    --border-strong: #b8b4a8;
+    --success: #2d6a4f;
+    --success-light: #d8f3dc;
+    --blue: #1d4e89;
+    --blue-light: #dbeafe;
+    --step-line: #ddd9cc;
+    --shadow: 0 2px 12px rgba(26,26,46,0.08);
+    --shadow-lg: 0 8px 32px rgba(26,26,46,0.12);
+  }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── 頂部導覽 ── */
+  header {
+    background: var(--ink);
+    color: white;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+  }
+  .logo {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  nav { display: flex; gap: 2rem; }
+  nav a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  nav a:hover { color: white; }
+  .btn-add {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-add:hover { background: #a84020; }
+  .btn-add:active { transform: scale(0.97); }
+
+  /* ── 主體佈局 ── */
+  .app { display: flex; min-height: calc(100vh - 64px); }
+
+  /* ── 側邊欄 ── */
+  aside {
+    width: 260px;
+    min-width: 260px;
+    background: white;
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .sidebar-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--ink-light);
+    text-transform: uppercase;
+    padding: 0.5rem 1.5rem;
+    margin-top: 0.5rem;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.55rem 1.5rem;
+    cursor: pointer;
+    color: var(--ink-light);
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .sidebar-item:hover { background: var(--paper-warm); color: var(--ink); }
+  .sidebar-item.active {
+    background: var(--accent-pale);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+  .sidebar-item .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border-strong);
+    flex-shrink: 0;
+  }
+  .sidebar-item.active .dot { background: var(--accent); }
+  .sidebar-add {
+    margin: 1rem 1.5rem;
+    padding: 8px;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 6px;
+    text-align: center;
+    color: var(--ink-light);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .sidebar-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-pale); }
+
+  /* ── 主內容區 ── */
+  main {
+    flex: 1;
+    padding: 2.5rem 3rem;
+    max-width: 900px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+
+  /* ── 教學頁面 ── */
+  .guide-page { display: none; }
+  .guide-page.active { display: block; }
+
+  /* ── 頁面標題區 ── */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-title-group {}
+  .page-category {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .page-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .page-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-light);
+  }
+  .page-actions { display: flex; gap: 8px; }
+  .btn-edit {
+    background: none;
+    border: 1px solid var(--border-strong);
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-light);
+    transition: all 0.15s;
+  }
+  .btn-edit:hover { border-color: var(--ink); color: var(--ink); background: var(--paper-warm); }
+  .btn-save {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    display: none;
+  }
+
+  /* ── 步驟區塊 ── */
+  .steps-container { margin: 2rem 0; }
+  .step-block {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+  .step-block::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 44px;
+    bottom: -30px;
+    width: 1px;
+    background: var(--step-line);
+  }
+  .step-block:last-child::before { display: none; }
+  .step-number {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .step-content { flex: 1; }
+  .step-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .step-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .step-title[contenteditable="true"] {
+    border-bottom: 2px solid var(--accent);
+    outline: none;
+    padding: 2px 4px;
+  }
+  .step-body {
+    color: var(--ink-light);
+    font-size: 14.5px;
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+  .step-body[contenteditable="true"] {
+    border: 1.5px solid var(--accent);
+    border-radius: 6px;
+    outline: none;
+    padding: 8px 10px;
+    background: var(--accent-pale);
+  }
+
+  /* ── 圖片上傳區 ── */
+  .image-upload-zone {
+    border: 2px dashed var(--border-strong);
+    border-radius: 10px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--paper-warm);
+    position: relative;
+    overflow: auto;
+    min-height: 120px;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    resize: both;
+  }
+  .image-upload-zone:hover { border-color: var(--accent); background: var(--accent-pale); }
+  .image-upload-zone.has-image { border-style: solid; border-color: var(--border); background: transparent; padding: 0; resize: both; overflow: auto; }
+  .image-upload-zone img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; display: block; }
+  .image-upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+  .upload-hint { font-size: 13px; color: var(--ink-light); margin-top: 6px; }
+  .upload-icon { font-size: 2rem; margin-bottom: 6px; }
+  .image-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center; justify-content: center;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    gap: 8px;
+  }
+  .image-upload-zone.has-image:hover .image-overlay { display: flex; }
+
+  /* ── 資訊卡片 ── */
+  .info-card {
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .info-card.notice { background: var(--gold-light); border-left: 4px solid var(--gold); }
+  .info-card.tip { background: var(--blue-light); border-left: 4px solid var(--blue); }
+  .info-card.success { background: var(--success-light); border-left: 4px solid var(--success); }
+  .info-card .card-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+  .info-card .card-body { flex: 1; }
+  .info-card .card-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .info-card.notice .card-title { color: var(--gold); }
+  .info-card.tip .card-title { color: var(--blue); }
+  .info-card.success .card-title { color: var(--success); }
+  .info-card p { font-size: 14px; color: var(--ink-light); }
+
+  /* ── 表格編輯器 ── */
+  .table-section { margin: 2rem 0; }
+  .table-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .editable-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    font-size: 14px;
+  }
+  .editable-table th {
+    background: var(--ink);
+    color: white;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .editable-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: white;
+    vertical-align: top;
+  }
+  .editable-table tr:last-child td { border-bottom: none; }
+  .editable-table tr:hover td { background: var(--paper-warm); }
+  .editable-table td[contenteditable="true"] {
+    outline: 2px solid var(--accent);
+    background: var(--accent-pale);
+  }
+  .editable-table th[contenteditable="true"] {
+    outline: 2px solid var(--gold);
+  }
+  .table-controls {
+    display: flex; gap: 8px;
+    margin-top: 10px;
+  }
+  .btn-table {
+    background: none;
+    border: 1px solid var(--border-strong);
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-light);
+    transition: all 0.15s;
+  }
+  .btn-table:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-pale); }
+
+  /* ── 常見問題 ── */
+  .faq-section { margin: 2rem 0; }
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .faq-question {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: white;
+    font-weight: 500;
+    font-size: 14px;
+    user-select: none;
+  }
+  .faq-question:hover { background: var(--paper-warm); }
+  .faq-toggle { font-size: 18px; color: var(--ink-light); transition: transform 0.2s; }
+  .faq-item.open .faq-toggle { transform: rotate(45deg); }
+  .faq-answer {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.2s;
+    font-size: 14px;
+    color: var(--ink-light);
+    background: var(--paper-warm);
+  }
+  .faq-item.open .faq-answer { max-height: 200px; padding: 12px 16px; }
+
+  /* ── 新增步驟按鈕 ── */
+  .add-step-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 2px dashed var(--border-strong);
+    border-radius: 8px;
+    padding: 14px 20px;
+    cursor: pointer;
+    color: var(--ink-light);
+    font-size: 14px;
+    background: none;
+    width: 100%;
+    font-family: inherit;
+    transition: all 0.2s;
+    margin-top: 1rem;
+  }
+  .add-step-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-pale); }
+
+  /* ── 空白頁 ── */
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+    color: var(--ink-light);
+  }
+  .empty-state h2 { font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--ink); }
+  .empty-state p { font-size: 14px; margin-bottom: 1.5rem; }
+
+  /* ── 進度條 ── */
+  .progress-bar { margin: 1.5rem 0; }
+  .progress-label { font-size: 13px; color: var(--ink-light); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .progress-track { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--success); border-radius: 4px; transition: width 0.3s; }
+
+  /* ── 編輯模式 ── */
+  .edit-badge {
+    display: none;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  body.editing .edit-badge { display: inline-block; }
+  body.editing .btn-save { display: inline-block; }
+  body.editing .btn-edit { display: none; }
+
+  /* ── 提示 Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--ink);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── 新增教學對話框 ── */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-bg.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    width: 480px;
+    max-width: 90vw;
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.95);
+    transition: transform 0.2s;
+  }
+  .modal-bg.open .modal { transform: scale(1); }
+  .modal h3 { font-family: 'Noto Serif TC', serif; font-size: 1.2rem; margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-label { font-size: 13px; font-weight: 500; color: var(--ink-light); margin-bottom: 5px; display: block; }
+  .form-input {
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    background: white;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-select {
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+    background: white;
+    outline: none;
+  }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem; }
+  .btn-cancel {
+    background: none; border: 1px solid var(--border-strong);
+    padding: 8px 18px; border-radius: 6px;
+    cursor: pointer; font-family: inherit; font-size: 14px; color: var(--ink-light);
+  }
+  .btn-confirm {
+    background: var(--ink); color: white; border: none;
+    padding: 8px 18px; border-radius: 6px;
+    cursor: pointer; font-family: inherit; font-size: 14px;
+  }
+  .btn-confirm:hover { background: var(--accent); }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .tag-required { background: var(--accent-light); color: var(--accent); }
+  .tag-optional { background: var(--gold-light); color: var(--gold); }
+  .tag-new { background: var(--success-light); color: var(--success); }
+
+  /* ── 步驟刪除按鈕 ── */
+  .btn-del-step {
+    display: none;
+    margin-left: auto;
+    background: none;
+    border: 1px solid #e0b0a0;
+    color: var(--accent);
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .btn-del-step:hover { background: var(--accent); color: white; }
+  body.editing .btn-del-step { display: inline-flex; align-items: center; gap: 4px; }
+
+  /* ── 表格刪除按鈕 ── */
+  .btn-del-row, .btn-del-col {
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn-del-row:hover, .btn-del-col:hover { color: var(--accent); background: var(--accent-pale); }
+  .btn-del-col {
+    position: absolute;
+    top: 4px; right: 20px;
+    display: none;
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+  }
+  .btn-del-col:hover { color: white; background: rgba(200,80,42,0.6); }
+  body.editing .btn-del-col { display: block; }
+  .row-del-cell { width: 36px; text-align: center; padding: 6px 4px !important; }
+  .btn-del-row { display: none; }
+  body.editing .btn-del-row { display: inline-block; }
+
+  /* ── 欄寬拖曳 ── */
+  .col-resizer {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 5px;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 1;
+  }
+  .col-resizer:hover, .col-resizer:active { background: rgba(255,255,255,0.35); }
+
+  /* ── 側邊欄增強 ── */
+  .sidebar-cat-title { cursor: default; }
+  .sidebar-cat-title:hover { color: var(--ink); }
+  .sidebar-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  .sidebar-label:hover { text-decoration: underline dotted; }
+  .sidebar-del {
+    display: none;
+    color: #ccc;
+    font-size: 11px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .sidebar-del:hover { color: var(--accent); background: var(--accent-pale); }
+  .sidebar-item:hover .sidebar-del { display: inline; }
+
+
+  /* ── 圖片拖曳大小（已在上方主樣式中設定）── */
+  .resize-hint {
+    position: absolute;
+    bottom: 4px; right: 6px;
+    font-size: 10px;
+    color: var(--border-strong);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── 字體工具列 ── */
+  .font-toolbar {
+    display: none;
+    position: fixed;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    border-radius: 10px;
+    padding: 6px 10px;
+    gap: 6px;
+    align-items: center;
+    z-index: 150;
+    box-shadow: var(--shadow-lg);
+    flex-wrap: wrap;
+    max-width: 95vw;
+  }
+  body.editing .font-toolbar { display: flex; }
+  .font-toolbar label { color: rgba(255,255,255,0.6); font-size: 11px; white-space: nowrap; }
+  .font-toolbar select, .font-toolbar input[type=number] {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 5px;
+    padding: 3px 6px;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+  }
+  .font-toolbar input[type=number] { width: 52px; }
+  .font-toolbar select option { background: #1a1a2e; color: white; }
+  .font-toolbar .tb-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 2px; }
+  .font-toolbar button {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .font-toolbar button:hover { background: rgba(255,255,255,0.25); }
+  .font-toolbar .tb-hint { color: rgba(255,255,255,0.4); font-size: 11px; }
+
+  /* ── 注意事項可編輯 ── */
+  .notice-title[contenteditable="true"],
+  .notice-body[contenteditable="true"] {
+    outline: none;
+    border-bottom: 1.5px dashed var(--gold);
+  }
+
+  /* ══ 手機下拉選單 Bar ══ */
+  /* 桌機不顯示 */
+  .mobile-nav-bar { display: none; }
+  .mobile-drawer  { display: none; }
+
+  /* ── 手機自適應 ── */
+  @media (max-width: 768px) {
+    header { padding: 0 1rem; height: 52px; }
+    nav { display: none; }
+    .logo { font-size: 0.95rem; }
+    .logo-icon { width: 26px; height: 26px; font-size: 13px; }
+    .btn-add { padding: 6px 11px; font-size: 12px; }
+
+    /* 主佈局：桌機 aside 隱藏，改用手機 bar */
+    .app { flex-direction: column; }
+    aside { display: none; }
+
+    /* ── 手機 Nav Bar（常駐細條，黏在 header 下方）── */
+    .mobile-nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 52px;
+      z-index: 90;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 1rem;
+      height: 44px;
+      box-shadow: 0 1px 6px rgba(26,26,46,0.07);
+      gap: 10px;
+    }
+    .mobile-nav-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .mobile-nav-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--paper-warm);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-family: inherit;
+      color: var(--ink-light);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .mobile-nav-toggle:hover, .mobile-nav-toggle.open {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-pale);
+    }
+    .mobile-nav-arrow {
+      display: inline-block;
+      transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
+      font-size: 10px;
+    }
+    .mobile-nav-toggle.open .mobile-nav-arrow { transform: rotate(180deg); }
+
+    /* ── 下拉抽屜（Drawer）── */
+    .mobile-drawer {
+      display: block;
+      position: fixed;
+      top: 96px; /* 52px header + 44px bar */
+      left: 0; right: 0;
+      z-index: 89;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 6px 20px rgba(26,26,46,0.13);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.32s cubic-bezier(0.22,1,0.36,1),
+                  opacity 0.22s ease;
+      opacity: 0;
+    }
+    .mobile-drawer.open {
+      max-height: 60vh;
+      overflow-y: auto;
+      opacity: 1;
+    }
+    .drawer-inner { padding: 0.5rem 0 0.75rem; }
+
+    /* Drawer 內的 sidebar 項目樣式 */
+    .drawer-cat {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
+      padding: 0.6rem 1.2rem 0.2rem;
+    }
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.55rem 1.2rem;
+      cursor: pointer;
+      color: var(--ink-light);
+      font-size: 14px;
+      transition: background 0.12s, color 0.12s;
+      border-left: 3px solid transparent;
+    }
+    .drawer-item:hover { background: var(--paper-warm); color: var(--ink); }
+    .drawer-item.active {
+      background: var(--accent-pale);
+      color: var(--accent);
+      border-left-color: var(--accent);
+      font-weight: 600;
+    }
+    .drawer-item .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--border-strong);
+      flex-shrink: 0;
+    }
+    .drawer-item.active .dot { background: var(--accent); }
+    .drawer-add {
+      margin: 0.6rem 1.2rem 0.2rem;
+      padding: 8px;
+      border: 1.5px dashed var(--border-strong);
+      border-radius: 6px;
+      text-align: center;
+      color: var(--ink-light);
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .drawer-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* 半透明背景遮罩 */
+    .drawer-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 88;
+      background: rgba(0,0,0,0);
+      transition: background 0.25s;
+    }
+    .drawer-backdrop.open {
+      display: block;
+      background: rgba(0,0,0,0.25);
+    }
+
+    /* main 正常填滿，不再受 aside 擠壓 */
+    main { padding: 1.2rem 1rem; max-width: 100%; }
+    .page-header { flex-direction: column; gap: 12px; }
+    .page-title { font-size: 1.35rem; }
+    .page-actions { align-self: flex-end; }
+
+    .step-block { gap: 0.8rem; }
+    .step-number { width: 32px; height: 32px; font-size: 12px; }
+
+    .info-card { padding: 0.9rem 1rem; }
+    .modal { padding: 1.5rem 1.2rem; }
+
+    .table-controls { flex-wrap: wrap; }
+    .editable-table { font-size: 12px; }
+    .editable-table th, .editable-table td { padding: 8px 10px; }
+
+    .font-toolbar { top: 52px; padding: 5px 8px; gap: 4px; }
+    .font-toolbar label { display: none; }
+    .font-toolbar .tb-hint { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .page-title { font-size: 1.15rem; }
+    .step-block::before { left: 16px; }
+    main { padding: 1rem 0.75rem; }
+  }
+
+  /* ── 側邊欄分類列 ── */
+  .sidebar-cat-row {
+    display: flex;
+    align-items: center;
+    padding-right: 0.5rem;
+  }
+  .sidebar-cat-row .sidebar-section-title {
+    flex: 1;
+  }
+  .sidebar-cat-del {
+    display: none;
+    color: #ccc;
+    font-size: 11px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .sidebar-cat-del:hover { color: var(--accent); background: var(--accent-pale); }
+  .sidebar-cat-row:hover .sidebar-cat-del { display: inline; }
+
+  /* ── 媒體區塊（圖片 / 影片）── */
+  .step-media { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+  .media-block {
+    position: relative;
+    border-radius: 10px;
+    overflow: visible;
+  }
+  .btn-del-media {
+    position: absolute;
+    top: -8px; right: -8px;
+    z-index: 10;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    border: 2px solid white;
+    font-size: 11px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-del-media:hover { background: #8b2010; transform: scale(1.1); }
+  body.editing .btn-del-media { display: flex; }
+
+  /* ── 影片縮圖卡片 ── */
+  .video-card {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #0f0f0f;
+    position: relative;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s;
+  }
+  .video-card:hover { transform: translateY(-2px); }
+  .video-thumb {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+  }
+  .video-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.35);
+    transition: background 0.2s;
+    gap: 10px;
+  }
+  .video-card:hover .video-play-overlay { background: rgba(0,0,0,0.5); }
+  .video-play-btn {
+    width: 64px; height: 64px;
+    background: rgba(255,0,0,0.9);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, background 0.15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .video-card:hover .video-play-btn { transform: scale(1.1); background: #ff0000; }
+  .video-play-btn svg { width: 28px; height: 28px; fill: white; margin-left: 4px; }
+  .video-title-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.75));
+    color: white;
+    font-size: 13px;
+    padding: 24px 12px 10px;
+    font-weight: 500;
+  }
+
+  /* ── 影片播放 Modal ── */
+  .video-modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .video-modal-bg.open { opacity: 1; pointer-events: auto; }
+  .video-modal-inner {
+    width: min(90vw, 900px);
+    position: relative;
+  }
+  .video-modal-close {
+    position: absolute;
+    top: -40px; right: 0;
+    background: none; border: none;
+    color: white; font-size: 28px;
+    cursor: pointer; line-height: 1;
+    transition: opacity 0.15s;
+  }
+  .video-modal-close:hover { opacity: 0.7; }
+  .video-modal-frame {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    border: none;
+    display: block;
+    background: #000;
+  }
+
+  /* ── 步驟媒體控制按鈕 ── */
+  .step-media-controls {
+    display: none;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  body.editing .step-media-controls { display: flex; }
+  .btn-media {
+    background: none;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-light);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-media:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-pale); }
+
+  /* ══ 唯讀模式 ══ */
+  /* 用法：在網址後加上 ?view=1 即進入純瀏覽模式 */
+  body.view-only .btn-add,
+  body.view-only .btn-edit,
+  body.view-only .btn-save,
+  body.view-only .btn-table,
+  body.view-only .add-step-btn,
+  body.view-only .font-toolbar,
+  body.view-only .table-controls,
+  body.view-only .sidebar-add,
+  body.view-only .sidebar-del,
+  body.view-only .sidebar-cat-del,
+  body.view-only .btn-del-step,
+  body.view-only .btn-del-media,
+  body.view-only .btn-del-row,
+  body.view-only .btn-del-col,
+  body.view-only .col-resizer,
+  body.view-only .resize-hint,
+  body.view-only .step-media-controls,
+  body.view-only .image-upload-zone input[type="file"],
+  body.view-only .image-overlay {
+    display: none !important;
+    pointer-events: none !important;
+  }
+  body.view-only .image-upload-zone {
+    cursor: default;
+    resize: none;
+  }
+  body.view-only .view-only-badge {
+    display: flex !important;
+  }
+
+  /* 唯讀標記 */
+  .view-only-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.85);
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ══ 手機抽屜滑入動畫（已在 drawer CSS 中設定）══ */
+  @media (max-width: 768px) {
+    main {
+      overflow-y: auto;
+    }
+  }
+
+  /* ══ 頁面切換動畫基底 ══ */
+  .guide-page, #home-view {
+    will-change: opacity, transform;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- 頂部導覽 -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">📋</div>
+    資料申請教學平台
+  </div>
+  <nav>
+    <a href="#" onclick="showSection('home')">首頁</a>
+    <a href="#" onclick="showSection('home')">所有教學</a>
+  </nav>
+  <div class="view-only-badge">👁 瀏覽模式</div>
+  <button class="btn-add" onclick="openModal()">＋ 新增教學</button>
+</header>
+
+<!-- 手機下拉 Nav Bar -->
+<div class="mobile-nav-bar" id="mobile-nav-bar">
+  <span class="mobile-nav-label" id="mobile-nav-label">📋 所有教學</span>
+  <button class="mobile-nav-toggle" id="mobile-nav-toggle" onclick="toggleDrawer()">
+    ☰ 切換教學 <span class="mobile-nav-arrow" id="mobile-nav-arrow">▼</span>
+  </button>
+</div>
+
+<!-- 半透明遮罩 -->
+<div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+
+<!-- 下拉抽屜 -->
+<div class="mobile-drawer" id="mobile-drawer">
+  <div class="drawer-inner" id="drawer-inner"></div>
+</div>
+
+<!-- 字體工具列 -->
+<div class="font-toolbar" id="font-toolbar">
+  <label>字體</label>
+  <select id="tb-font" onchange="applyFont(this.value)">
+    <option value="'Noto Sans TC',sans-serif">Noto Sans TC</option>
+    <option value="'Noto Serif TC',serif">Noto Serif TC（宋體）</option>
+    <option value="Arial,sans-serif">Arial</option>
+    <option value="Georgia,serif">Georgia</option>
+    <option value="'Courier New',monospace">Courier New</option>
+  </select>
+  <div class="tb-sep"></div>
+  <label>大小</label>
+  <input type="number" id="tb-size" min="10" max="60" value="15" onchange="applySize(this.value)" oninput="applySize(this.value)">
+  <span style="color:rgba(255,255,255,0.5);font-size:12px">px</span>
+  <div class="tb-sep"></div>
+  <button onclick="applyBold()" title="粗體"><b>B</b></button>
+  <button onclick="applyItalic()" title="斜體"><i>I</i></button>
+  <div class="tb-sep"></div>
+  <span class="tb-hint">選取文字後套用樣式</span>
+</div>
+
+<div class="app">
+  <!-- 側邊欄 -->
+  <aside id="sidebar">
+    <div class="sidebar-section-title">教學分類</div>
+    <div id="sidebar-list"></div>
+    <div class="sidebar-add" onclick="openModal()">＋ 新增教學頁面</div>
+  </aside>
+
+  <!-- 主內容 -->
+  <main id="main-content">
+    <!-- 首頁 / 歡迎畫面 -->
+    <div id="home-view">
+      <div class="page-header">
+        <div class="page-title-group">
+          <div class="page-category">歡迎使用</div>
+          <div class="page-title" style="font-family:'Noto Serif TC',serif">資料申請教學平台</div>
+        </div>
+      </div>
+      <div class="info-card tip">
+        <div class="card-icon">💡</div>
+        <div class="card-body">
+          <div class="card-title">如何使用此平台</div>
+          <p>點擊右上角「新增教學」來建立新的教學頁面，或從左側選單選擇現有教學。每個教學頁面支援圖文並茂的步驟說明與可編輯表格。</p>
+        </div>
+      </div>
+      <div id="guide-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin-top:2rem;"></div>
+      <div id="empty-home" class="empty-state" style="display:none;">
+        <div style="font-size:3rem;margin-bottom:1rem;">📂</div>
+        <h2>尚無教學頁面</h2>
+        <p>點擊「新增教學」開始建立你的第一個教學！</p>
+        <button class="btn-add" onclick="openModal()">＋ 新增教學</button>
+      </div>
+    </div>
+
+    <!-- 動態教學頁面容器 -->
+    <div id="guides-container"></div>
+  </main>
+</div>
+
+<!-- 新增教學 Modal -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>📝 建立新教學</h3>
+    <div class="form-group">
+      <label class="form-label">教學名稱 *</label>
+      <input type="text" class="form-input" id="new-title" placeholder="例如：戶籍謄本申請步驟">
+    </div>
+    <div class="form-group">
+      <label class="form-label">分類</label>
+      <select class="form-select" id="new-category">
+        <option value="戶政">戶政</option>
+        <option value="地政">地政</option>
+        <option value="稅務">稅務</option>
+        <option value="健保">健保</option>
+        <option value="金融信用">金融信用</option>
+        <option value="勞動保險">勞動保險</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">簡短描述</label>
+      <input type="text" class="form-input" id="new-desc" placeholder="簡述此教學內容">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-confirm" onclick="createGuide()">建立教學</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 影片播放 Modal -->
+<div class="video-modal-bg" id="video-modal" onclick="if(event.target===this)closeVideoModal()">
+  <div class="video-modal-inner">
+    <button class="video-modal-close" onclick="closeVideoModal()">✕</button>
+    <iframe id="video-modal-frame" class="video-modal-frame" allowfullscreen
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+    </iframe>
+  </div>
+</div>
+
+<script>
+  let guides = [];
+  let currentGuide = null;
+  let stepCounter = {};
+
+  // ── 範例預設資料 ──
+  const defaultGuides = [
+    {
+      id: 'guide-lianzheng',
+      title: '聯徵報告申請',
+      category: '金融信用',
+      desc: '透過金融聯合徵信中心查詢個人信用報告，了解自身信用狀況',
+      steps: [
+        { id: 'lz-s1', title: '選擇申請方式', body: '聯徵報告可透過三種方式申請：①網路申辦（JCIC 官網）②臨櫃申辦（聯徵中心或合作金融機構）③郵寄申辦。建議首次使用者至臨櫃辦理，以便確認身分。' },
+        { id: 'lz-s2', title: '準備所需文件', body: '備妥身分證正本、第二身分證明文件（如駕照、健保卡）、申請費用（每次申請費 100 元，首次免費）。' },
+        { id: 'lz-s3', title: '填寫申請書並提出申請', body: '至服務窗口取得申請書，填寫姓名、身分證字號、出生年月日、聯絡電話及申請用途。確認資料無誤後，交由承辦人員審核。' },
+        { id: 'lz-s4', title: '身分驗證', body: '工作人員將核對您的身分證件，並確認您是否本人申請。委託他人辦理時，需提供授權書及雙方身分證件。' },
+        { id: 'lz-s5', title: '繳費並取得報告', body: '繳清費用後，報告通常當場列印提供。網路申辦者會在 2～3 個工作日內寄送至留存地址，或以 Email 通知下載。' },
+      ],
+      table: {
+        headers: ['項目', '說明', '是否必備'],
+        rows: [
+          ['身分證', '正本', '必備'],
+          ['第二證件', '駕照、健保卡擇一', '必備'],
+          ['申請費', '100元（首次免費）', '必備'],
+          ['授權書', '委託他人辦理時', '視情況'],
+          ['受委託人身分證', '委託辦理時需提供', '視情況'],
+        ]
+      }
+    },
+    {
+      id: 'guide-laobao',
+      title: '勞保明細查詢',
+      category: '勞動保險',
+      desc: '查詢個人勞保投保明細、年資及保費繳納紀錄',
+      steps: [
+        { id: 'lb-s1', title: '選擇查詢管道', body: '可透過以下方式查詢：①勞動部勞保局 e 化服務系統（網路）②勞保局各地服務處（臨櫃）③自然人憑證線上查詢。建議使用 e 化系統最便捷。' },
+        { id: 'lb-s2', title: '登入勞保局 e 化服務系統', body: '前往 https://edesk.bli.gov.tw，點選「個人申辦」。首次使用需以健保卡讀卡機或行動自然人憑證（MOICA）進行身分驗證。' },
+        { id: 'lb-s3', title: '查詢投保明細', body: '登入後點選「勞工保險」→「投保資料查詢」，即可查看目前投保單位、投保薪資、加退保日期等完整紀錄。' },
+        { id: 'lb-s4', title: '下載或列印明細', body: '選擇所需期間，點選「列印」或「下載 PDF」即可取得正式投保明細書。如需加蓋機關章，請至勞保局臨櫃申請核章版本。' },
+      ],
+      table: {
+        headers: ['查詢方式', '所需工具', '費用'],
+        rows: [
+          ['e化服務系統', '自然人憑證 / 健保卡讀卡機', '免費'],
+          ['臨櫃申辦', '身分證正本', '免費'],
+          ['郵寄申辦', '申請書＋身分證影本', '免費'],
+          ['加蓋章版本', '臨櫃申辦', '免費'],
+        ]
+      }
+    },
+    {
+      id: 'guide-caichan',
+      title: '財產清冊申請',
+      category: '稅務',
+      desc: '透過財政部稅務入口網查詢個人名下財產狀況',
+      steps: [
+        { id: 'cc-s1', title: '前往財政部稅務入口網', body: '開啟瀏覽器，前往「財政部稅務入口網」(https://www.etax.nat.gov.tw)，點選「個人憑證登入」進行身分驗證。' },
+        { id: 'cc-s2', title: '身分驗證登入', body: '使用自然人憑證（插入讀卡機）或行動自然人憑證 App（掃描 QR Code）登入。若無憑證，可至國稅局臨櫃申辦。' },
+        { id: 'cc-s3', title: '查詢財產資料', body: '登入後點選「財產資料查詢」，選擇欲查詢的年度，系統將列出名下不動產、動產（車輛）、股票等財產清單。' },
+        { id: 'cc-s4', title: '列印或下載財產清冊', body: '確認資料無誤後，點選「列印」輸出財產清冊。如需機關核章版，請持身分證至各地國稅局申請蓋章。' },
+      ],
+      table: {
+        headers: ['申辦方式', '需備證件', '備註'],
+        rows: [
+          ['網路（自然人憑證）', '晶片讀卡機＋憑證', '最便利'],
+          ['網路（行動憑證）', 'MOICA App', '需先申請'],
+          ['國稅局臨櫃', '身分證正本', '可取蓋章版'],
+          ['委託代辦', '委託書＋雙方身分證', '需授權'],
+        ]
+      }
+    },
+    {
+      id: 'guide-suode',
+      title: '所得清單申請',
+      category: '稅務',
+      desc: '查詢個人歷年所得資料，常用於申辦貸款、租屋等用途',
+      steps: [
+        { id: 'sd-s1', title: '登入財政部電子申報系統', body: '前往「財政部稅務入口網」，使用自然人憑證或行動自然人憑證登入。亦可直接至各地國稅局臨櫃申辦。' },
+        { id: 'sd-s2', title: '選擇查詢年度', body: '進入「所得資料查詢」，選擇欲查詢的課稅年度（通常為前一年度）。系統提供近五年所得資料查詢。' },
+        { id: 'sd-s3', title: '確認所得項目', body: '查詢結果將顯示各類所得：薪資所得、執行業務所得、利息所得、租賃所得、股利等，請確認資料完整。' },
+        { id: 'sd-s4', title: '列印所得清單', body: '點選「列印所得資料」，取得所得清單。若需蓋機關章，請持身分證至所在地國稅局申請。部分機構接受自行列印版本，請先確認對方要求。' },
+      ],
+      table: {
+        headers: ['所得類型', '開立單位', '備註'],
+        rows: [
+          ['薪資所得', '任職公司', '最常見類型'],
+          ['利息所得', '銀行/金融機構', '含存款利息'],
+          ['租賃所得', '申報人自行申報', '出租房屋'],
+          ['股利所得', '上市公司', '含現金股利'],
+          ['執行業務所得', '客戶/機構', '自由業者'],
+        ]
+      }
+    },
+    {
+      id: 'guide-hujiche',
+      title: '戶籍謄本申請',
+      category: '戶政',
+      desc: '至戶政事務所或網路申請戶籍謄本，用於各類公務申辦',
+      steps: [
+        { id: 'hj-s1', title: '確認申請類型', body: '戶籍謄本分為「全戶戶籍謄本」與「個人戶籍謄本」。請依申辦用途確認所需類型，並確認是否需要加蓋認證章。' },
+        { id: 'hj-s2', title: '選擇申辦方式', body: '可臨櫃至任一戶政事務所辦理（跨所加收 10 元），或透過「戶政司全球資訊網」線上申辦後郵寄取件。' },
+        { id: 'hj-s3', title: '準備所需文件', body: '臨櫃辦理需備妥：身分證正本、印章（可以簽名代替）、申請費用。代理人需另備委託書及代理人身分證。' },
+        { id: 'hj-s4', title: '填寫申請書', body: '取得申請書，填寫申請人姓名、身分證字號、戶籍地址、申請份數及用途。請確認各欄位填寫完整。' },
+        { id: 'hj-s5', title: '繳費取件', body: '每份 15 元，當場取件。如跨所辦理，每份加收 10 元作業費。請確認份數及謄本內容正確無誤。' },
+      ],
+      table: {
+        headers: ['項目', '說明', '是否必備'],
+        rows: [
+          ['身分證', '正本', '必備'],
+          ['申請費', '每份 15 元（跨所 +10 元）', '必備'],
+          ['印章', '私章或簽名均可', '擇一'],
+          ['委託書', '代理人辦理時', '視情況'],
+          ['代理人身分證', '代理辦理時', '視情況'],
+        ]
+      }
+    },
+    {
+      id: 'guide-jianbao',
+      title: '健保快易通查詢',
+      category: '健保',
+      desc: '透過健保快易通 App 查詢個人就醫紀錄、保費及投保資料',
+      steps: [
+        { id: 'jb-s1', title: '下載健保快易通 App', body: '至 Apple App Store 或 Google Play 搜尋「健保快易通」，下載並安裝官方應用程式（開發者為衛生福利部中央健康保險署）。' },
+        { id: 'jb-s2', title: '完成帳號註冊／登入', body: '開啟 App 後，點選「會員登入」。首次使用需以健保卡號＋身分證字號完成註冊，或使用自然人憑證、Taiwan FidO 登入。' },
+        { id: 'jb-s3', title: '查詢個人健保資料', body: '登入後可查詢：①就醫紀錄（門診、住院、藥品）②保費繳納狀況③投保金額及單位④健康存摺（含健檢報告）。' },
+        { id: 'jb-s4', title: '下載或列印所需資料', body: '選擇欲下載的資料項目，點選「匯出 PDF」或「列印」。如需官方核章文件，請至各地健保署服務中心臨櫃申辦。' },
+      ],
+      table: {
+        headers: ['查詢項目', '功能說明', '備註'],
+        rows: [
+          ['就醫紀錄', '門診、急診、住院記錄', '近3年'],
+          ['投保資料', '目前投保單位及金額', '即時更新'],
+          ['保費繳納', '應繳及已繳保費紀錄', '含滯納金'],
+          ['健康存摺', '健檢及疫苗紀錄', '需開通'],
+          ['藥品紀錄', '歷次用藥清單', '近3個月'],
+        ]
+      }
+    },
+    {
+      id: 'guide-fangwushui',
+      title: '房屋稅籍證明申請',
+      category: '稅務',
+      desc: '申請房屋稅籍證明文件，用於房屋買賣、貸款或各類行政申辦',
+      steps: [
+        { id: 'fw-s1', title: '確認申請用途', body: '房屋稅籍證明常用於：房屋買賣過戶、銀行貸款設定、水電申請及各類行政申辦。請先向申請機關確認所需版本（是否需要加蓋機關章）。' },
+        { id: 'fw-s2', title: '選擇申辦方式', body: '可至房屋所在地的地方稅務局（或稅捐稽徵處）臨櫃申辦，或透過各縣市政府財政局網路服務申請列印。' },
+        { id: 'fw-s3', title: '準備所需文件', body: '備妥：申請人身分證正本、房屋坐落地址（門牌號碼）、申請用途說明。若為他人名下房屋，需附屋主委託書及屋主身分證影本。' },
+        { id: 'fw-s4', title: '填寫申請書', body: '取得「房屋稅籍謄本申請書」，填寫：申請人姓名、身分證字號、房屋地址、申請份數及用途。確認填寫完整後送交窗口。' },
+        { id: 'fw-s5', title: '繳費取件', body: '繳付工本費（各縣市約 10～25 元不等），當場取件。取件後請核對房屋地址、稅籍號碼、面積等資訊是否正確。' },
+      ],
+      table: {
+        headers: ['項目', '說明', '備註'],
+        rows: [
+          ['身分證', '正本', '必備'],
+          ['房屋地址', '完整門牌號碼', '必備'],
+          ['申請費', '約 10～25 元（各縣市不同）', '現金'],
+          ['委託書', '非本人名下房屋', '需公證或認證'],
+          ['屋主身分證影本', '委託代辦時', '需附上'],
+        ]
+      }
+    },
+  ];
+
+  // ── 初始化 ──
+  window.onload = () => {
+    guides = [...defaultGuides];
+    guides.forEach(g => stepCounter[g.id] = g.steps.length);
+    renderSidebar();
+    renderHomeCards();
+    defaultGuides.forEach(g => renderGuidePage(g));
+
+    // 唯讀模式：URL 含 ?view=1 時隱藏所有編輯功能
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('view') === '1') {
+      document.body.classList.add('view-only');
+    }
+
+    showSection('home');
+  };
+
+  function showSection(mode, id) {
+    const container = document.getElementById('guides-container');
+    const homeView = document.getElementById('home-view');
+
+    // 先淡出目前頁面
+    const fadeOut = (el) => {
+      el.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(6px)';
+    };
+    const fadeIn = (el) => {
+      el.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(10px)';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      }));
+    };
+
+    // 淡出目前可見內容
+    if (homeView.style.display !== 'none') fadeOut(homeView);
+    container.querySelectorAll('.guide-page.active').forEach(p => fadeOut(p));
+
+    setTimeout(() => {
+      homeView.style.display = 'none';
+      container.querySelectorAll('.guide-page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+      if (mode === 'home') {
+        homeView.style.display = 'block';
+        fadeIn(homeView);
+      } else if (mode === 'guide' && id) {
+        const page = document.getElementById(id);
+        if (page) {
+          page.classList.add('active');
+          currentGuide = id;
+          fadeIn(page);
+        }
+        const sItem = document.querySelector(`.sidebar-item[data-id="${id}"]`);
+        if (sItem) sItem.classList.add('active');
+      }
+
+      // 捲回頁面頂部（桌機捲 main，手機捲 window）
+      const mainEl = document.querySelector('main');
+      if (mainEl) mainEl.scrollTop = 0;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // 更新手機 bar 標題
+      if (mode === 'home') {
+        updateMobileLabel('');
+      } else if (mode === 'guide' && id) {
+        const g = guides.find(g => g.id === id);
+        if (g) updateMobileLabel(g.title);
+      }
+
+    }, 180);
+  }
+
+  // ── 渲染側邊欄 ──
+  function renderSidebar() {
+    const list = document.getElementById('sidebar-list');
+    if (guides.length === 0) {
+      list.innerHTML = '<div style="padding:1rem 1.5rem;font-size:13px;color:var(--ink-light)">尚無教學頁面</div>';
+      return;
+    }
+    const cats = {};
+    guides.forEach(g => { if (!cats[g.category]) cats[g.category] = []; cats[g.category].push(g); });
+
+    list.innerHTML = '';
+    Object.entries(cats).forEach(([cat, items]) => {
+      // 分類標題列
+      const catRow = document.createElement('div');
+      catRow.className = 'sidebar-cat-row';
+      const catTitle = document.createElement('div');
+      catTitle.className = 'sidebar-section-title sidebar-cat-title';
+      catTitle.title = '雙擊修改分類名稱';
+      catTitle.dataset.cat = cat;
+      catTitle.textContent = cat;
+      const catDel = document.createElement('span');
+      catDel.className = 'sidebar-cat-del';
+      catDel.title = '刪除整個分類';
+      catDel.textContent = '✕';
+      catDel.onclick = (e) => { e.stopPropagation(); deleteCategory(cat); };
+      catTitle.ondblclick = (e) => { e.stopPropagation(); editSidebarCategory(catTitle, cat); };
+      catRow.appendChild(catTitle);
+      catRow.appendChild(catDel);
+      list.appendChild(catRow);
+
+      // 教學項目
+      items.forEach(g => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item';
+        item.dataset.id = g.id;
+        item.onclick = () => showSection('guide', g.id);
+        item.innerHTML = `<span class="dot"></span>
+          <span class="sidebar-label" title="雙擊修改名稱">${g.title}</span>
+          <span class="sidebar-del" title="刪除此教學">✕</span>`;
+        item.querySelector('.sidebar-label').ondblclick = (e) => {
+          e.stopPropagation();
+          editSidebarTitle(item.querySelector('.sidebar-label'), g.id);
+        };
+        item.querySelector('.sidebar-del').onclick = (e) => {
+          e.stopPropagation();
+          deleteGuide(g.id);
+        };
+        list.appendChild(item);
+      });
+    });
+
+    // 同步更新手機抽屜
+    if (document.getElementById('mobile-drawer').classList.contains('open')) renderDrawer();
+  }
+
+  function deleteCategory(cat) {
+    const count = guides.filter(g => g.category === cat).length;
+    if (!confirm(`確定要刪除分類「${cat}」及其下 ${count} 個教學嗎？此操作無法還原。`)) return;
+    const toDelete = guides.filter(g => g.category === cat).map(g => g.id);
+    toDelete.forEach(id => {
+      guides = guides.filter(g => g.id !== id);
+      const page = document.getElementById(id);
+      if (page) page.remove();
+    });
+    renderSidebar();
+    renderHomeCards();
+    showSection('home');
+    showToast(`🗑️ 已刪除分類「${cat}」`);
+  }
+
+  function editSidebarTitle(el, guideId) {
+    const old = el.textContent;
+    el.contentEditable = 'true';
+    el.style.outline = '1px solid var(--accent)';
+    el.style.borderRadius = '3px';
+    el.style.padding = '1px 4px';
+    el.focus();
+    const finish = () => {
+      el.contentEditable = 'false';
+      el.style.outline = '';
+      el.style.padding = '';
+      const newTitle = el.textContent.trim() || old;
+      el.textContent = newTitle;
+      const guide = guides.find(g => g.id === guideId);
+      if (guide) {
+        guide.title = newTitle;
+        const page = document.getElementById(guideId);
+        if (page) page.querySelector('.page-title').textContent = newTitle;
+        renderHomeCards();
+      }
+      showToast('✅ 名稱已更新');
+    };
+    el.onblur = finish;
+    el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } };
+  }
+
+  function editSidebarCategory(el, oldCat) {
+    el.contentEditable = 'true';
+    el.style.outline = '1px solid var(--gold)';
+    el.style.borderRadius = '3px';
+    el.focus();
+    const finish = () => {
+      const newCat = el.textContent.trim() || oldCat;
+      el.contentEditable = 'false';
+      el.style.outline = '';
+      el.textContent = newCat;
+      guides.forEach(g => { if (g.category === oldCat) g.category = newCat; });
+      showToast('✅ 分類名稱已更新');
+    };
+    el.onblur = finish;
+    el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } };
+  }
+
+  function deleteGuide(guideId) {
+    if (!confirm('確定要刪除此教學頁面嗎？')) return;
+    guides = guides.filter(g => g.id !== guideId);
+    const page = document.getElementById(guideId);
+    if (page) page.remove();
+    renderSidebar();
+    renderHomeCards();
+    showSection('home');
+    showToast('🗑️ 已刪除教學頁面');
+  }
+
+  // ── 渲染首頁卡片 ──
+  function renderHomeCards() {
+    const container = document.getElementById('guide-cards');
+    const empty = document.getElementById('empty-home');
+    if (guides.length === 0) { container.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    container.innerHTML = guides.map(g => `
+      <div onclick="showSection('guide','${g.id}')" style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.2rem;cursor:pointer;transition:all 0.2s;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform=''">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px">${g.category}</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:8px;color:var(--ink)">${g.title}</div>
+        <div style="font-size:13px;color:var(--ink-light);line-height:1.6">${g.desc}</div>
+        <div style="margin-top:12px;font-size:12px;color:var(--ink-light)">📋 ${g.steps.length} 個步驟</div>
+      </div>
+    `).join('');
+  }
+
+  // ── 渲染教學頁面 ──
+  function renderGuidePage(guide) {
+    const container = document.getElementById('guides-container');
+    const existing = document.getElementById(guide.id);
+    if (existing) existing.remove();
+
+    const stepsHtml = guide.steps.map((s, i) => buildStepHtml(s, i + 1, guide.id)).join('');
+    const tableHtml = buildTableHtml(guide);
+
+    const div = document.createElement('div');
+    div.className = 'guide-page';
+    div.id = guide.id;
+    div.innerHTML = `
+      <div class="page-header">
+        <div class="page-title-group">
+          <div class="page-category">${guide.category}</div>
+          <div class="page-title">${guide.title}</div>
+          <div class="page-meta">
+            <span>📋 ${guide.steps.length} 個步驟</span>
+            <span class="edit-badge">編輯模式</span>
+          </div>
+        </div>
+        <div class="page-actions">
+          <button class="btn-edit" onclick="toggleEdit('${guide.id}')">✏️ 編輯</button>
+          <button class="btn-save" onclick="saveEdit('${guide.id}')">✅ 儲存</button>
+        </div>
+      </div>
+
+      <div class="info-card notice">
+        <div class="card-icon">⚠️</div>
+        <div class="card-body">
+          <div class="card-title notice-title" contenteditable="false">注意事項</div>
+          <p class="notice-body" contenteditable="false">辦理前請確認攜帶所有必要文件，以免往返奔波。如有疑問請洽詢相關機關。</p>
+        </div>
+      </div>
+
+      <h2 style="font-family:'Noto Serif TC',serif;font-size:1.1rem;margin:2rem 0 1rem;color:var(--ink)">📌 申辦步驟</h2>
+      <div class="steps-container" id="steps-${guide.id}">${stepsHtml}</div>
+      <button class="add-step-btn" onclick="addStep('${guide.id}')">＋ 新增步驟</button>
+
+      <div class="table-section">
+        <div class="table-section-title">📄 所需文件清單
+          <span class="tag tag-required">必備</span>
+        </div>
+        <div id="table-wrap-${guide.id}">${tableHtml}</div>
+        <div class="table-controls">
+          <button class="btn-table" onclick="addTableRow('${guide.id}')">＋ 新增列</button>
+          <button class="btn-table" onclick="addTableCol('${guide.id}')">＋ 新增欄</button>
+        </div>
+      </div>
+
+      <div class="faq-section">
+        <h2 style="font-family:'Noto Serif TC',serif;font-size:1.1rem;margin:2rem 0 1rem;color:var(--ink)">❓ 常見問題</h2>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">可以委託他人代辦嗎？<span class="faq-toggle">＋</span></div>
+          <div class="faq-answer">可以，但需提供委託人身分證影本及委託書，以及受委託人的身分證正本。</div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">申請多久可以取件？<span class="faq-toggle">＋</span></div>
+          <div class="faq-answer">一般現場申請當場即可取件。如有特殊情況需要審核，將另行通知。</div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">是否可以網路申請？<span class="faq-toggle">＋</span></div>
+          <div class="faq-answer">部分資料可透過政府服務網路平台申請，請至「內政部戶政司全球資訊網」查詢線上服務項目。</div>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+
+  function buildStepHtml(step, num, guideId) {
+    return `
+      <div class="step-block" id="${step.id}">
+        <div class="step-number">${num}</div>
+        <div class="step-content">
+          <div class="step-title-row">
+            <div class="step-title" data-field="title">${step.title}</div>
+            <button class="btn-del-step" onclick="deleteStep('${step.id}','${guideId}')" title="刪除此步驟">✕ 刪除步驟</button>
+          </div>
+          <div class="step-body" data-field="body">${step.body}</div>
+          <div class="step-media" id="media-${step.id}"></div>
+          <div class="step-media-controls">
+            <button class="btn-media" onclick="addImageBlock('${step.id}')">🖼️ 加入圖片</button>
+            <button class="btn-media" onclick="addVideoBlock('${step.id}')">▶️ 嵌入影片</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // 新增圖片區塊（獨立、可刪除）
+  function addImageBlock(stepId) {
+    const media = document.getElementById('media-' + stepId);
+    if (!media) return;
+    const blockId = 'imgblock-' + Date.now();
+    const wrap = document.createElement('div');
+    wrap.className = 'media-block';
+    wrap.id = blockId;
+    wrap.innerHTML = `
+      <button class="btn-del-media" onclick="document.getElementById('${blockId}').remove();showToast('🗑️ 已移除圖片')" title="移除此圖片">✕</button>
+      <div class="image-upload-zone" onclick="triggerUpload(this)">
+        <input type="file" accept="image/*" onchange="handleImageUpload(event, this.parentElement)">
+        <div class="upload-icon">🖼️</div>
+        <div style="font-weight:500;font-size:14px">點擊上傳圖片</div>
+        <div class="upload-hint">支援 JPG、PNG、GIF、WebP</div>
+        <div class="image-overlay">🔄 更換圖片</div>
+        <div class="resize-hint">⤡ 拖曳調整大小</div>
+      </div>`;
+    media.appendChild(wrap);
+    showToast('✅ 已新增圖片區塊');
+  }
+
+  // 新增 YouTube 影片區塊（縮圖卡片，點擊彈窗播放）
+  function addVideoBlock(stepId) {
+    const url = prompt('請貼上 YouTube 影片網址：', 'https://www.youtube.com/watch?v=');
+    if (!url) return;
+    const videoId = extractYouTubeId(url);
+    if (!videoId) { alert('無法辨識 YouTube 網址，請確認格式正確（支援 watch、youtu.be、shorts）。'); return; }
+    const media = document.getElementById('media-' + stepId);
+    if (!media) return;
+    const blockId = 'vidblock-' + Date.now();
+    const thumbUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    const wrap = document.createElement('div');
+    wrap.className = 'media-block video-block';
+    wrap.id = blockId;
+    wrap.innerHTML = `
+      <button class="btn-del-media" onclick="document.getElementById('${blockId}').remove();showToast('🗑️ 已移除影片')" title="移除此影片">✕</button>
+      <div class="video-card" onclick="openVideoModal('${videoId}')">
+        <img class="video-thumb"
+          src="${thumbUrl}"
+          onerror="this.src='https://img.youtube.com/vi/${videoId}/hqdefault.jpg'"
+          alt="影片縮圖">
+        <div class="video-play-overlay">
+          <div class="video-play-btn">
+            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          </div>
+          <div style="color:white;font-size:12px;opacity:0.85">點擊播放影片</div>
+        </div>
+        <div class="video-title-bar">YouTube 影片</div>
+      </div>`;
+    media.appendChild(wrap);
+    showToast('✅ 已加入 YouTube 影片（點縮圖播放）');
+  }
+
+  function openVideoModal(videoId) {
+    const modal = document.getElementById('video-modal');
+    const frame = document.getElementById('video-modal-frame');
+    // Use privacy-enhanced mode (youtube-nocookie.com) to reduce restrictions
+    frame.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+    modal.classList.add('open');
+  }
+
+  function closeVideoModal() {
+    const modal = document.getElementById('video-modal');
+    const frame = document.getElementById('video-modal-frame');
+    modal.classList.remove('open');
+    // Stop video by clearing src
+    setTimeout(() => { frame.src = ''; }, 200);
+  }
+
+  function extractYouTubeId(url) {
+    const patterns = [
+      /[?&]v=([\w-]{11})/,
+      /youtu\.be\/([\w-]{11})/,
+      /youtube\.com\/embed\/([\w-]{11})/,
+      /youtube\.com\/shorts\/([\w-]{11})/
+    ];
+    for (const p of patterns) {
+      const m = url.match(p);
+      if (m) return m[1];
+    }
+    return null;
+  }
+
+  function deleteStep(stepId, guideId) {
+    const el = document.getElementById(stepId);
+    if (!el) return;
+    if (!confirm('確定要刪除此步驟嗎？')) return;
+    const guide = guides.find(g => g.id === guideId);
+    if (guide) guide.steps = guide.steps.filter(s => s.id !== stepId);
+    el.remove();
+    // Re-number remaining steps
+    const container = document.getElementById('steps-' + guideId);
+    container.querySelectorAll('.step-block').forEach((block, i) => {
+      block.querySelector('.step-number').textContent = i + 1;
+    });
+    showToast('🗑️ 已刪除步驟');
+  }
+
+  function buildTableHtml(guide) {
+    const { headers, rows } = guide.table;
+    const thHtml = headers.map((h, i) => `
+      <th style="position:relative;min-width:80px;">
+        <span contenteditable="false">${h}</span>
+        <div class="col-resizer" onmousedown="startColResize(event,this)"></div>
+        <button class="btn-del-col" onclick="deleteTableCol('${guide.id}',${i})" title="刪除此欄">✕</button>
+      </th>`).join('');
+    const tbodyHtml = rows.map((r, ri) => `<tr>
+      ${r.map(c => `<td contenteditable="false">${c}</td>`).join('')}
+      <td class="row-del-cell"><button class="btn-del-row" onclick="deleteTableRow(this,'${guide.id}')" title="刪除此列">✕</button></td>
+    </tr>`).join('');
+    return `<table class="editable-table" id="tbl-${guide.id}" style="table-layout:fixed;width:100%">
+      <thead><tr>${thHtml}<th class="row-del-cell" style="width:36px;"></th></tr></thead>
+      <tbody>${tbodyHtml}</tbody>
+    </table>`;
+  }
+
+  function deleteTableRow(btn, guideId) {
+    const row = btn.closest('tr');
+    const tbl = document.getElementById('tbl-' + guideId);
+    if (tbl.tBodies[0].rows.length <= 1) { showToast('⚠️ 至少保留一列'); return; }
+    row.remove();
+    showToast('🗑️ 已刪除列');
+  }
+
+  function deleteTableCol(guideId, colIdx) {
+    const tbl = document.getElementById('tbl-' + guideId);
+    const colCount = tbl.tHead.rows[0].cells.length - 1; // -1 for del col
+    if (colCount <= 1) { showToast('⚠️ 至少保留一欄'); return; }
+    tbl.tHead.rows[0].deleteCell(colIdx);
+    Array.from(tbl.tBodies[0].rows).forEach(row => row.deleteCell(colIdx));
+    // Re-index delete buttons
+    Array.from(tbl.tHead.rows[0].cells).forEach((th, i) => {
+      const btn = th.querySelector('.btn-del-col');
+      if (btn) btn.setAttribute('onclick', `deleteTableCol('${guideId}',${i})`);
+    });
+    showToast('🗑️ 已刪除欄');
+  }
+
+  let _resizeCol = null, _resizeStartX = 0, _resizeStartW = 0;
+  function startColResize(e, handle) {
+    e.preventDefault();
+    _resizeCol = handle.closest('th');
+    _resizeStartX = e.clientX;
+    _resizeStartW = _resizeCol.offsetWidth;
+    document.onmousemove = ev => {
+      const newW = Math.max(60, _resizeStartW + ev.clientX - _resizeStartX);
+      _resizeCol.style.width = newW + 'px';
+    };
+    document.onmouseup = () => { document.onmousemove = null; document.onmouseup = null; _resizeCol = null; };
+  }
+
+  // ── 建立教學 ──
+  function createGuide() {
+    const title = document.getElementById('new-title').value.trim();
+    if (!title) { alert('請輸入教學名稱'); return; }
+    const id = 'guide-' + Date.now();
+    const guide = {
+      id,
+      title,
+      category: document.getElementById('new-category').value,
+      desc: document.getElementById('new-desc').value || '點擊進入查看詳細教學步驟',
+      steps: [
+        { id: `${id}-s1`, title: '步驟一：準備', body: '請在此填寫步驟說明...' }
+      ],
+      table: {
+        headers: ['項目', '說明', '備註'],
+        rows: [['文件名稱', '說明', '備註']]
+      }
+    };
+    stepCounter[id] = 1;
+    guides.push(guide);
+    renderGuidePage(guide);
+    renderSidebar();
+    renderHomeCards();
+    closeModal();
+    showSection('guide', id);
+    showToast(`✅ 已建立「${title}」教學頁面`);
+    document.getElementById('new-title').value = '';
+    document.getElementById('new-desc').value = '';
+  }
+
+  // ── 圖片上傳 ──
+  function triggerUpload(zone) {
+    if (!zone.classList.contains('has-image')) {
+      zone.querySelector('input[type=file]').click();
+    }
+  }
+  function handleImageUpload(event, zone) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      zone.innerHTML = `
+        <input type="file" accept="image/*" onchange="handleImageUpload(event,this.parentElement)" style="position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2">
+        <img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;border-radius:8px;display:block">
+        <div class="image-overlay">🔄 更換圖片</div>
+        <div class="resize-hint">⤡ 拖曳調整大小</div>`;
+      zone.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── 新增步驟 ──
+  function addStep(guideId) {
+    const guide = guides.find(g => g.id === guideId);
+    stepCounter[guideId] = (stepCounter[guideId] || 0) + 1;
+    const num = stepCounter[guideId];
+    const step = { id: `${guideId}-s${num}`, title: `步驟 ${num}`, body: '請在此填寫步驟說明...' };
+    guide.steps.push(step);
+
+    const stepsEl = document.getElementById(`steps-${guideId}`);
+    const div = document.createElement('div');
+    div.innerHTML = buildStepHtml(step, num, guideId);
+    stepsEl.appendChild(div.firstElementChild);
+    if (document.body.classList.contains('editing')) enableEditing(guideId, true);
+    showToast('✅ 已新增步驟');
+  }
+
+  // ── 表格操作 ──
+  function addTableRow(guideId) {
+    const tbl = document.getElementById(`tbl-${guideId}`);
+    const colCount = tbl.tHead.rows[0].cells.length - 1; // exclude del col
+    const tr = document.createElement('tr');
+    const isEditing = document.body.classList.contains('editing');
+    for (let i = 0; i < colCount; i++) {
+      const td = document.createElement('td');
+      td.textContent = '新增資料';
+      td.contentEditable = isEditing ? 'true' : 'false';
+      tr.appendChild(td);
+    }
+    const delTd = document.createElement('td');
+    delTd.className = 'row-del-cell';
+    delTd.innerHTML = `<button class="btn-del-row" onclick="deleteTableRow(this,'${guideId}')" title="刪除此列">✕</button>`;
+    tr.appendChild(delTd);
+    tbl.tBodies[0].appendChild(tr);
+    showToast('✅ 已新增一列');
+  }
+
+  function addTableCol(guideId) {
+    const tbl = document.getElementById(`tbl-${guideId}`);
+    const headerRow = tbl.tHead.rows[0];
+    const newColIdx = headerRow.cells.length - 1; // insert before del col
+    const isEditing = document.body.classList.contains('editing');
+    const th = document.createElement('th');
+    th.style.position = 'relative';
+    th.style.minWidth = '80px';
+    const span = document.createElement('span');
+    span.textContent = '欄位名稱';
+    span.contentEditable = isEditing ? 'true' : 'false';
+    const resizer = document.createElement('div');
+    resizer.className = 'col-resizer';
+    resizer.setAttribute('onmousedown', 'startColResize(event,this)');
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn-del-col';
+    delBtn.title = '刪除此欄';
+    delBtn.textContent = '✕';
+    delBtn.setAttribute('onclick', `deleteTableCol('${guideId}',${newColIdx})`);
+    th.appendChild(span); th.appendChild(resizer); th.appendChild(delBtn);
+    headerRow.insertBefore(th, headerRow.cells[newColIdx]);
+    Array.from(tbl.tBodies[0].rows).forEach(row => {
+      const td = document.createElement('td');
+      td.textContent = '資料';
+      td.contentEditable = isEditing ? 'true' : 'false';
+      row.insertBefore(td, row.cells[newColIdx]);
+    });
+    // Re-index all del buttons
+    Array.from(headerRow.cells).forEach((cell, i) => {
+      const btn = cell.querySelector('.btn-del-col');
+      if (btn) btn.setAttribute('onclick', `deleteTableCol('${guideId}',${i})`);
+    });
+    showToast('✅ 已新增一欄');
+  }
+
+  // ── 編輯模式 ──
+  function toggleEdit(guideId) {
+    document.body.classList.add('editing');
+    enableEditing(guideId, true);
+    showToast('📝 已進入編輯模式，點選任何文字即可修改');
+  }
+
+  function enableEditing(guideId, on) {
+    const page = document.getElementById(guideId);
+    page.querySelectorAll('.step-title, .step-body').forEach(el => el.contentEditable = on ? 'true' : 'false');
+    // notice card
+    page.querySelectorAll('.notice-title, .notice-body').forEach(el => el.contentEditable = on ? 'true' : 'false');
+    const tbl = document.getElementById(`tbl-${guideId}`);
+    if (tbl) {
+      tbl.querySelectorAll('td').forEach(td => { if (!td.classList.contains('row-del-cell')) td.contentEditable = on ? 'true' : 'false'; });
+      tbl.querySelectorAll('th span').forEach(span => span.contentEditable = on ? 'true' : 'false');
+    }
+  }
+
+  function saveEdit(guideId) {
+    document.body.classList.remove('editing');
+    enableEditing(guideId, false);
+    showToast('✅ 已儲存所有修改');
+  }
+
+  // ── 字體與字型大小工具 ──
+  let _activeEditEl = null;
+
+  document.addEventListener('selectionchange', () => {
+    if (!document.body.classList.contains('editing')) return;
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+      const node = sel.anchorNode;
+      // Find closest editable parent
+      const el = node && node.nodeType === 3 ? node.parentElement : node;
+      if (el && el.isContentEditable) {
+        _activeEditEl = el;
+        // Reflect current computed style in toolbar
+        const cs = window.getComputedStyle(el);
+        document.getElementById('tb-size').value = Math.round(parseFloat(cs.fontSize)) || 15;
+      }
+    }
+  });
+
+  function applyFont(font) {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) {
+      // Apply to whole element
+      if (_activeEditEl) _activeEditEl.style.fontFamily = font;
+      return;
+    }
+    document.execCommand('fontName', false, font);
+  }
+
+  function applySize(size) {
+    size = parseInt(size);
+    if (!size || size < 8 || size > 80) return;
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) {
+      if (_activeEditEl) _activeEditEl.style.fontSize = size + 'px';
+      return;
+    }
+    // Wrap selection in a span with font-size
+    const range = sel.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontSize = size + 'px';
+    try { range.surroundContents(span); } catch(e) {
+      // fallback: apply to element
+      if (_activeEditEl) _activeEditEl.style.fontSize = size + 'px';
+    }
+    sel.removeAllRanges();
+  }
+
+  function applyBold() {
+    document.execCommand('bold', false, null);
+  }
+
+  function applyItalic() {
+    document.execCommand('italic', false, null);
+  }
+
+  // ── FAQ 開合 ──
+  function toggleFaq(item) {
+    item.classList.toggle('open');
+  }
+
+  // ── 手機抽屜下拉 ──
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function renderDrawer() {
+    const inner = document.getElementById('drawer-inner');
+    if (!inner) return;
+    const cats = {};
+    guides.forEach(g => { if (!cats[g.category]) cats[g.category] = []; cats[g.category].push(g); });
+    let html = Object.entries(cats).map(([cat, items]) => `
+      <div class="drawer-cat">${cat}</div>
+      ${items.map(g => `
+        <div class="drawer-item${currentGuide === g.id ? ' active' : ''}" onclick="selectDrawerGuide('${g.id}')">
+          <span class="dot"></span>${g.title}
+        </div>`).join('')}
+    `).join('');
+    html += `<div class="drawer-add" onclick="closeDrawer();openModal()">＋ 新增教學</div>`;
+    inner.innerHTML = html;
+  }
+
+  function selectDrawerGuide(id) {
+    closeDrawer();
+    showSection('guide', id);
+  }
+
+  function toggleDrawer() {
+    const drawer = document.getElementById('mobile-drawer');
+    const backdrop = document.getElementById('drawer-backdrop');
+    const toggle = document.getElementById('mobile-nav-toggle');
+    const isOpen = drawer.classList.contains('open');
+    if (isOpen) {
+      closeDrawer();
+    } else {
+      renderDrawer();
+      drawer.classList.add('open');
+      backdrop.classList.add('open');
+      toggle.classList.add('open');
+    }
+  }
+
+  function closeDrawer() {
+    document.getElementById('mobile-drawer').classList.remove('open');
+    document.getElementById('drawer-backdrop').classList.remove('open');
+    const toggle = document.getElementById('mobile-nav-toggle');
+    if (toggle) toggle.classList.remove('open');
+  }
+
+  function updateMobileLabel(title) {
+    const label = document.getElementById('mobile-nav-label');
+    if (label) label.textContent = title ? '📄 ' + title : '📋 所有教學';
+  }
+
+  // ── Modal ──
+  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+  document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) closeModal(); });
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // （預設頁面已在 window.onload 中初始化）
+</script>
+</body>
+</html>
